@@ -13,11 +13,10 @@ class BookViewModel:
         对book原数据进行整理
         :param book: 原数据
         """
-
         self.title = book['title']
         self.publisher = book['publisher']
         self.pages = book['pages'] or ''
-        self.author = '、'.join(book['author'])
+        self.author = '、'.join(book['author']) if type(book['author']) == 'dict' else book['author']
         self.price = book['price']
         self.summary = book['summary'] or ''
         self.image = book['image']

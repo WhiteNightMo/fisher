@@ -11,7 +11,7 @@ db = SQLAlchemy()
 class Book(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String(50), nullable=False)
-    author = Column(String(30), default='未名')
+    author = Column(String(80), default='未名')
     binding = Column(String(20))  # 精装|平装
     publisher = Column(String(50))  # 出版社
     price = Column(String(20))  # 单价
