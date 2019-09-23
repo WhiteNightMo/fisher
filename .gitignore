@@ -116,3 +116,5 @@ dmypy.json
 
 # IDE
 .idea
+
+app/secure.py
