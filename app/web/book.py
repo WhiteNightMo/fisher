@@ -3,7 +3,7 @@
 """
 import json
 
-from flask import jsonify, request
+from flask import jsonify, request, render_template, flash
 
 from app.forms.book import SearchForm
 from app.libs.helper import is_isbn_or_key
@@ -44,8 +44,15 @@ def search():
             yushu_book.search_by_keyword(q, page)
 
         # 整理搜索结果
-        books.fill(yushu_book)
+        books.fill(yushu_book, q)
         # 对象需要使用__dict__属性转换成字典才能json化，递归将对象转换成字典再json化
-        return json.dumps(books, default=lambda o: o.__dict__)
+        # return json.dumps(books, default=lambda o: o.__dict__)
     else:
-        return jsonify(form.errors)
+        flash('搜索的关键字不符合要求，请重新输入关键字')
+        # return jsonify(form.errors)
+    return render_template('search_result.html', books=books)
+
+
+@web.route('/book/<isbn>/detail')
+def book_detail(isbn):
+    pass
