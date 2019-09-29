@@ -16,10 +16,20 @@ class BookViewModel:
         self.title = book['title']
         self.publisher = book['publisher']
         self.pages = book['pages'] or ''
-        self.author = '、'.join(book['author']) if type(book['author']) == 'dict' else book['author']
+        self.author = '、'.join(book['author']) if isinstance(book['author'], list) else book['author']
         self.price = book['price']
         self.summary = book['summary'] or ''
+        self.isbn = book['isbn']
         self.image = book['image']
+
+    @property
+    def intro(self):
+        """
+        以属性形式获取intro信息
+        :return:
+        """
+        intros = filter(lambda x: True if x else False, [self.author, self.publisher, self.price])
+        return ' / '.join(intros)
 
 
 class BookCollection:
@@ -30,7 +40,7 @@ class BookCollection:
     def __init__(self):
         self.total = 0
         self.books = []
-        self.keyword = ''
+        self.keyword = None
 
     def fill(self, yushu_book, keyword):
         self.total = yushu_book.total

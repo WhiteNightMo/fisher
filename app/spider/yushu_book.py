@@ -6,7 +6,8 @@ from flask import current_app
 from sqlalchemy import or_
 
 from app.libs.http import HTTP
-from app.models.book import Book, db
+from app.models.base import db
+from app.models.book import Book
 
 
 class YuShuBook:
@@ -48,13 +49,14 @@ class YuShuBook:
         :return:
         """
         # 先检索数据库，再通过API搜索
-        result = Book.query.filter(or_(Book.title.contains(keyword), Book.author.contains(keyword))).all()
-        if result:
-            books = []
-            for book in result:
-                books.append(book.__dict__)
-            result.clear()
-            result = {'books': books, 'total': len(books)}
+        books = Book.query.filter(or_(Book.title.contains(keyword), Book.author.contains(keyword))).all()
+        # 分页获取数据
+        page_books = books[self.calculate_start(page):(page * current_app.config['PER_PAGE'])]
+        if page_books:
+            data = []
+            for book in page_books:
+                data.append(book.__dict__)
+            result = {'books': data, 'total': len(books)}
         else:
             url = self.keyword_url.format(keyword, current_app.config['PER_PAGE'], self.calculate_start(page))
             result = HTTP.get(url)
@@ -95,3 +97,7 @@ class YuShuBook:
                                 image=item['image'])
                     db.session.add(book)
             db.session.commit()
+
+    @property
+    def first(self):
+        return self.books[0] if self.total >= 1 else None
