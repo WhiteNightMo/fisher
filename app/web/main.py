@@ -3,7 +3,7 @@ from . import web
 
 @web.route('/')
 def index():
-    pass
+    return 'This is web index page'
 
 
 @web.route('/personal')
