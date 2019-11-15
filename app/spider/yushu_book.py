@@ -91,10 +91,17 @@ class YuShuBook:
                 # 已存在的不需要插入
                 count = Book.query.filter_by(isbn=item['isbn']).count()
                 if count == 0:
-                    book = Book(title=item['title'], author='、'.join(item['author']), binding=item['binding'],
-                                publisher=item['publisher'], price=item['price'], pages=item['pages'],
-                                pubdate=item['pubdate'], isbn=item['isbn'], summary=item['summary'],
-                                image=item['image'])
+                    book = Book()
+                    book.title = item['title']
+                    book.author = '、'.join(item['author'])
+                    book.binding = item['binding']
+                    book.publisher = item['publisher']
+                    book.price = item['price']
+                    book.pages = item['pages']
+                    book.pubdate = item['pubdate']
+                    book.isbn = item['isbn']
+                    book.summary = item['summary']
+                    book.image = item['image']
                     db.session.add(book)
             db.session.commit()
 
