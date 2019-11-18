@@ -1,16 +1,26 @@
-from flask import current_app, flash, redirect, url_for
+from flask import current_app, flash, redirect, url_for, render_template
 from flask_login import login_required, current_user
 
 from app.models.base import db
 from app.models.book import Book
 from app.models.gift import Gift
+from app.view_models.trade import MyTrades
 from . import web
 
 
 @web.route('/my/gifts')
 @login_required
 def my_gifts():
-    return 'My Gifts'
+    uid = current_user.id
+    # 获取当前用户未赠送的礼物列表
+    gifts_of_mine = Gift.get_user_gifts(uid)
+    # 获取isbn列表
+    isbn_list = [gift.isbn for gift in gifts_of_mine]
+    # 获取这些isbn的心愿数量
+    wish_count_list = Gift.get_wish_counts(isbn_list)
+    # 封装视图模型
+    view_model = MyTrades(gifts_of_mine, wish_count_list)
+    return render_template('my_gifts.html', gifts=view_model.trades)
 
 
 @web.route('/gifts/book/<isbn>')
