@@ -4,8 +4,10 @@
 from flask import Flask
 from app.models.base import db
 from flask_login import LoginManager
+from flask_mail import Mail
 
 login_manage = LoginManager()
+mail = Mail()
 
 
 def create_app():
@@ -27,6 +29,9 @@ def create_app():
     # 指定登录视图函数，以及未登录的提示
     login_manage.login_view = 'web.login'
     login_manage.login_message = '请先登录或注册'
+
+    # 初始化flask-mail插件
+    mail.init_app(app)
 
     # 实例化数据库对象
     db.init_app(app)

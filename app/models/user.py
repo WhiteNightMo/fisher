@@ -1,14 +1,15 @@
 """
     Created by xukai on 2019/6/3
 """
-
+from flask import current_app
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask_login import UserMixin
 from sqlalchemy import Column, Integer, String, Boolean, Float
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import login_manage
 from app.libs.helper import is_isbn_or_key
-from app.models.base import Base
+from app.models.base import Base, db
 from app.models.gift import Gift
 from app.models.wish import Wish
 from app.spider.yushu_book import YuShuBook
@@ -37,6 +38,32 @@ class User(UserMixin, Base):
 
     def check_password(self, raw):
         return check_password_hash(self.password, raw)
+
+    def generate_token(self, expires=600):
+        """
+        生成重置密码token
+        :param expires:
+        :return:
+        """
+
+        s = Serializer(current_app.config['SECRET_KEY'], expires)
+        return s.dumps({'id': self.id}).decode('utf-8')
+
+    @staticmethod
+    def reset_password(token, new_password):
+        # 读取token中的用户ID
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token.encode('utf-8'))
+        except:
+            return False
+
+        # 更新密码
+        uid = data.get('id')
+        with db.auto_commit():
+            user = User.query.get(uid)
+            user.password = new_password
+        return True
 
     # 如果不存在id字段，需覆盖UserMixin的get_id函数指定当前模型的唯一标识
     # def get_id(self):
