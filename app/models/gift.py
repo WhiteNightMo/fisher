@@ -18,6 +18,15 @@ class Gift(Base):
     bid = Column(Integer, ForeignKey('book.id'))
     launched = Column(Boolean, default=False)
 
+    def is_yourself_gift(self, uid):
+        """
+        判断是否是你的礼物
+        :param uid:
+        :return:
+        """
+
+        return True if self.uid == uid else False
+
     @classmethod
     def get_user_gifts(cls, uid):
         """

@@ -1,6 +1,8 @@
 """
     Created by xukai on 2019/6/3
 """
+from math import floor
+
 from flask import current_app
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask_login import UserMixin
@@ -8,8 +10,10 @@ from sqlalchemy import Column, Integer, String, Boolean, Float
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import login_manage
+from app.libs.enums import PendingStatus
 from app.libs.helper import is_isbn_or_key
 from app.models.base import Base, db
+from app.models.drift import Drift
 from app.models.gift import Gift
 from app.models.wish import Wish
 from app.spider.yushu_book import YuShuBook
@@ -90,6 +94,37 @@ class User(UserMixin, Base):
             return True
         else:
             return False
+
+    def can_send_drift(self):
+        """
+        是否能发送鱼漂
+        :return:
+        """
+
+        # 鱼豆是否充足
+        if self.beans < 1:
+            return False
+
+        # 成功赠送的数量
+        success_gifts_count = Gift.query.filter_by(uid=self.id, launched=True).count()
+        # 成功接收的数量
+        success_receive_count = Drift.query.filter_by(requester_id=self.id, pending=PendingStatus.Success).count()
+        # 每索要两本书，必须送出一本书
+        return True if floor(success_receive_count / 2) <= floor(success_gifts_count) else False
+
+    @property
+    def summary(self):
+        """
+        用户简略信息
+        :return:
+        """
+
+        return dict(
+            nickname=self.nickname,
+            beans=self.beans,
+            email=self.email,
+            send_receive=str(self.send_counter) + '/' + str(self.receive_counter)
+        )
 
 
 @login_manage.user_loader

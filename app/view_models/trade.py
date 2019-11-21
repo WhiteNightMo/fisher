@@ -14,7 +14,8 @@ class TradeInfo:
         self.total = len(goods)
         self.trades = [self.__map_to_trade(single) for single in goods]
 
-    def __map_to_trade(self, single):
+    @staticmethod
+    def __map_to_trade(single):
         """
         转换封装数据
         :param single:
