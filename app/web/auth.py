@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, flash
-from flask_login import login_user, logout_user
+from flask_login import login_user, logout_user, login_required, current_user
 
-from app.forms.auth import RegisterForm, LoginForm, EmailForm, ResetPasswordForm
+from app.forms.auth import RegisterForm, LoginForm, EmailForm, ResetPasswordForm, ChangePasswordForm
 from app.libs.email import send_mail
 from app.models.base import db
 from app.models.user import User
@@ -65,8 +65,18 @@ def forget_password(token):
 
 
 @web.route('/change/password', methods=['GET', 'POST'])
+@login_required
 def change_password():
-    pass
+    form = ChangePasswordForm(request.form)
+    if request.method == 'POST' and form.validate():
+        if current_user.check_password(form.old_password.data):
+            with db.auto_commit():
+                current_user.password = form.new_password1.data
+                flash('密码修改成功')
+                return redirect(url_for('web.personal_center'))
+        else:
+            flash('原密码有误')
+    return render_template('auth/change_password.html', form=form)
 
 
 @web.route('/logout')
